@@ -1,0 +1,36 @@
+version: "3.9"
+
+networks:
+  lablan:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+services:
+  web-01:
+    image: shamiplacide/wrapify:v2
+    container_name: web-01
+    hostname: web-01
+    networks:
+      lablan:
+        ipv4_address: 172.20.0.11
+
+  web-02:
+    image: shamiplacide/wrapify:v2
+    container_name: web-02
+    hostname: web-02
+    networks:
+      lablan:
+        ipv4_address: 172.20.0.12
+
+  lb-01:
+    build: ./lb
+    container_name: lb-01
+    hostname: lb-01
+    networks:
+      lablan:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "2210:22"
+      - "8082:80"
