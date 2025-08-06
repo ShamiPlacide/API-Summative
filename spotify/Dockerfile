@@ -16,7 +16,3 @@ EXPOSE 8080
 
 # Run the Flask app
 CMD ["python", "wrapify.py"]
-
-
-copy ./public /usr/share/nginx/html
-ssh-keygen -R [localhost]:2211
