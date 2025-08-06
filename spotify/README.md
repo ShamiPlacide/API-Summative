@@ -6,7 +6,7 @@ Image Details
 * Image Name: shamiplacide/wrapify
 * Tags:
     * v1 - Initial release
-    * latest - Latest stable version
+    * v3 - Latest stable version
 Build Instructions
 Local Build
 # Clone or create project directory
@@ -15,15 +15,15 @@ cd spotify
 
 # Create the required files (wrapify.py, requirements.txt, Dockerfile)
 # Build the Docker image
-docker build -t shamiplacide/wrapify:v1 .
+docker build -t shamiplacide/wrapify:v3 .
 
 # Tag as latest
-docker tag shamiplacide/wrapify:v1 shamiplacide/wrapify:latest
+docker tag shamiplacide/wrapify:v3 shamiplacide/wrapify:v3
 
 # Push to Docker Hub
 docker login
-docker push shamiplacide/wrapify:v1
-docker push shamiplacide/wrapify:latest
+docker push shamiplacide/wrapify:v3
+docker push shamiplacide/wrapify:v3
 Docker Compose Build
 # Set up directory structure
 mkdir -p web lb
@@ -52,7 +52,7 @@ docker run -d --name web-01 --hostname web-01 \
   -e SPOTIFY_CLIENT_ID=your_client_id \
   -e SPOTIFY_CLIENT_SECRET=your_client_secret \
   -e SPOTIFY_REDIRECT_URI=http://localhost:8080/callback \
-  shamiplacide/wrapify:v1
+  shamiplacide/wrapify:v3
 
 # Web-02
 docker run -d --name web-02 --hostname web-02 \
@@ -61,7 +61,7 @@ docker run -d --name web-02 --hostname web-02 \
   -e SPOTIFY_CLIENT_ID=your_client_id \
   -e SPOTIFY_CLIENT_SECRET=your_client_secret \
   -e SPOTIFY_REDIRECT_URI=http://localhost:8081/callback \
-  shamiplacide/wrapify:v1
+  shamiplacide/wrapify:v3
 Environment Variables
 * SPOTIFY_CLIENT_ID: Your Spotify app client ID
 * SPOTIFY_CLIENT_SECRET: Your Spotify app client secret
@@ -141,6 +141,7 @@ Architecture
 [Client] → [HAProxy Load Balancer:8082] → [web-01:80] or [web-02:80]
                      (lb-01)                Flask App    Flask App
                   172.20.0.10            172.20.0.11   172.20.0.12
+
 Project Structure
 spotify/
 ├── docker-compose.yml

@@ -619,7 +619,7 @@ if __name__ == '__main__':
       # Docker/Production settings
       port = int(os.environ.get('PORT', 80))
       host = '0.0.0.0'
-      REDIRECT_URI = "http://your-production-domain.com/callback"
+      REDIRECT_URI = os.environ.get('REDIRECT_URI', "http://your-production-domain.com/callback")
     else:
       # Local development settings
       port = 8080
