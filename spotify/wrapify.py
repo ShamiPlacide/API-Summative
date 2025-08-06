@@ -4,13 +4,18 @@ import urllib.parse
 from flask import Flask, request, redirect, session, render_template_string
 import secrets
 from collections import Counter
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Generate a random secret key
 
+#load environment variables
+load_dotenv()
+
 # Spotify API credentials
-SPOTIFY_CLIENT_ID = '64e7c8f8ad2c4064a75382ad1beae61e'
-SPOTIFY_CLIENT_SECRET = 'ac81d33d4e884fab89cded23a53911f0'
+
+CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
+CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 SPOTIFY_REDIRECT_URI = 'http://127.0.0.1:8080/callback'
 
 # Spotify API endpoints
@@ -24,7 +29,7 @@ SCOPES = 'user-top-read user-read-recently-played'
 def get_spotify_auth_url():
     """Generate Spotify authorization URL"""
     params = {
-        'client_id': SPOTIFY_CLIENT_ID,
+        'client_id': CLIENT_ID,
         'response_type': 'code',
         'redirect_uri': SPOTIFY_REDIRECT_URI,
         'scope': SCOPES,
@@ -38,8 +43,8 @@ def get_access_token(auth_code):
         'grant_type': 'authorization_code',
         'code': auth_code,
         'redirect_uri': SPOTIFY_REDIRECT_URI,
-        'client_id': SPOTIFY_CLIENT_ID,
-        'client_secret': SPOTIFY_CLIENT_SECRET
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET
     }
 
     response = requests.post(SPOTIFY_TOKEN_URL, data=data)
@@ -594,13 +599,13 @@ def logout():
 
 if __name__ == '__main__':
     # Check if credentials are set
-    if SPOTIFY_CLIENT_ID == 'your_client_id_here' or SPOTIFY_CLIENT_SECRET == 'your_client_secret_here':
+    if CLIENT_ID == 'your_client_id_here' or CLIENT_SECRET == 'your_client_secret_here':
         print("\n" + "="*60)
         print("⚠️  SETUP REQUIRED!")
         print("="*60)
         print("Please update the following in the code:")
-        print(f"SPOTIFY_CLIENT_ID = '{SPOTIFY_CLIENT_ID}'")
-        print(f"SPOTIFY_CLIENT_SECRET = '{SPOTIFY_CLIENT_SECRET}'")
+        print(f"SPOTIFY_CLIENT_ID = '{CLIENT_ID}'")
+        print(f"SPOTIFY_CLIENT_SECRET = '{CLIENT_SECRET}'")
         print("\nSteps to get your credentials:")
         print("1. Go to https://developer.spotify.com/dashboard")
         print("2. Create a new app")
