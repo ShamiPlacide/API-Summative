@@ -11,8 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy app code
 COPY wrapify.py /app
 
-COPY .env /app/.env
-
 ENV ENVIRONMENT=production
 
 # Expose the Flask port
