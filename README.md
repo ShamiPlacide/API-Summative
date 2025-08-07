@@ -1,91 +1,51 @@
 # Wrapify
 
-Wrapify is a containerized **Flask web application** that visualizes your Spotify listening habits using the **Spotify Web API**.
-It supports **multi-container deployment with Docker Compose** and includes **HAProxy load balancing** for scalability.
-
----
-
-## Features
-- View your Spotify listening statistics (tracks, artists, habits).
-- Secure OAuth authentication with Spotify.
-- Containerized for portability using Docker.
-- Load-balanced with HAProxy for high availability.
-- Easy deployment using Docker Compose.
-
----
-
-## Architecture
-
-```
-
-\[Client] → \[HAProxy Load Balancer:8082] → \[web-01:80] or \[web-02:80]
-(lb-01)                Flask App    Flask App
-172.20.0.10            172.20.0.11   172.20.0.12
-
-````
-
-lb working.png
-
----
-
-## Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/)
-- A [Spotify Developer account](https://developer.spotify.com/dashboard/) to get API credentials
-
----
-
-## Environment Variables
-
-| Variable                | Description                    | Example                          |
-|-------------------------|--------------------------------|----------------------------------|
-| `SPOTIFY_CLIENT_ID`     | Your Spotify app client ID     | `abc123def456`                   |
-| `SPOTIFY_CLIENT_SECRET` | Your Spotify app client secret | `xyz789uvw000`                   |
-| `SPOTIFY_REDIRECT_URI`  | OAuth redirect URI             | `http://localhost:8080/callback` |
-
----
-
-## Installation & Setup
-
-### Clone & Build Locally
-```bash
+A containerized Flask web application that displays users' Spotify listening habits using the Spotify Web API, deployed with Docker Compose and load balancing.
+Image Details
+* Docker Hub Repository: shamiplacide/wrapify
+* Image Name: shamiplacide/wrapify
+* Tags:
+    * v1 - Initial release
+    * v3 - Latest stable version
+Build Instructions
+Local Build
 # Clone or create project directory
 mkdir spotify
 cd spotify
 
 # Create the required files (wrapify.py, requirements.txt, Dockerfile)
+# Build the Docker image
+docker build -t shamiplacide/wrapify:v3 .
 
-# Pull the Docker image
-docker pull shamiplacide/wrapify:v3
+# Tag as latest
+docker tag shamiplacide/wrapify:v3 shamiplacide/wrapify:v3
 
----
-
-### Using Docker Compose (Recommended)
-
-```bash
+# Push to Docker Hub
+docker login
+docker push shamiplacide/wrapify:v3
+docker push shamiplacide/wrapify:v3
+Docker Compose Build
 # Set up directory structure
 mkdir -p web lb
 # Place application files in web/ directory
 # Place HAProxy config in lb/ directory
 
-# Build and start all containers
+# Build and deploy entire infrastructure
+docker compose up --build -d
+Run Instructions
+Docker Compose Method (Recommended)
+The application uses Docker Compose to orchestrate multiple containers:
+# Start all services
 docker compose up -d --build
 
-# Check running containers
+# Check status
 docker compose ps
 
 # View logs
 docker compose logs
-```
-
----
-
-### Running Individual Containers
-
-#### Web-01
-
-```bash
+Individual Container Method
+For web-01 and web-02 containers:
+# Web-01
 docker run -d --name web-01 --hostname web-01 \
   --network lablan --ip 172.20.0.11 \
   -p 2211:22 -p 8080:80 \
@@ -93,11 +53,8 @@ docker run -d --name web-01 --hostname web-01 \
   -e SPOTIFY_CLIENT_SECRET=your_client_secret \
   -e SPOTIFY_REDIRECT_URI=http://localhost:8080/callback \
   shamiplacide/wrapify:v3
-```
 
-#### Web-02
-
-```bash
+# Web-02
 docker run -d --name web-02 --hostname web-02 \
   --network lablan --ip 172.20.0.12 \
   -p 2212:22 -p 8081:80 \
@@ -105,15 +62,14 @@ docker run -d --name web-02 --hostname web-02 \
   -e SPOTIFY_CLIENT_SECRET=your_client_secret \
   -e SPOTIFY_REDIRECT_URI=http://localhost:8081/callback \
   shamiplacide/wrapify:v3
-```
-
----
-
-## Load Balancer (HAProxy)
-
-### Configuration (`/etc/haproxy/haproxy.cfg`)
-
-```haproxy
+Environment Variables
+* SPOTIFY_CLIENT_ID: Your Spotify app client ID
+* SPOTIFY_CLIENT_SECRET: Your Spotify app client secret
+* SPOTIFY_REDIRECT_URI: OAuth callback URL
+* PORT: Application port (default: 80)
+Load Balancer Configuration
+HAProxy Configuration
+The load balancer (lb-01) uses HAProxy with the following configuration in /etc/haproxy/haproxy.cfg:
 global
     daemon
     maxconn 256
@@ -134,59 +90,59 @@ backend servers
     server web02 172.20.0.12:80 check
     http-response set-header X-Served-By web01 if { srv_id 1 }
     http-response set-header X-Served-By web02 if { srv_id 2 }
-```
-
-### Setup Commands
-
-```bash
-# Get into load balancer container
-docker exec -it lb-01 /bin/bash
+HAProxy Setup Commands
+# SSH into load balancer container
+Docker exec -it lb-01 /bin/bash
 
 # Install HAProxy
-apt update && apt install -y haproxy
+sudo apt update && sudo apt install -y haproxy
 
-# Edit HAProxy config
-vim /etc/haproxy/haproxy.cfg
+# Create configuration file (content above)
+sudo vim /etc/haproxy/haproxy.cfg
 
-# Restart HAProxy
-service haproxy restart
-```
+# Reload HAProxy (if needed)
+sudo service haproxy restart
 
----
+Testing Steps & Evidence
+1. Individual Container Testing
+# Test web-01 directly
+curl http://localhost:8080
 
-## Testing
+# Test web-02 directly
+curl http://localhost:8081
+2. Internal Network Testing
+# From inside lb-01 container
+Docker exec -it lb-01 /bin/bash
 
-1. **Test individual containers:**
+# Test internal connectivity
+curl http://web-01:80
+curl http://web-02:80
+3. Load Balancer Testing
+# Test load balancing multiple times
+curl -I http://localhost:8082
+curl -I http://localhost:8082
+curl -I http://localhost:8082
+curl -I http://localhost:8082
+Expected Results
+* Each request should return HTTP 200
+* The X-Served-By header should alternate between web01 and web02
+* Both containers should receive requests in round-robin fashion
+Evidence of Load Balancing
+$ curl -I http://localhost:8082
+HTTP/1.1 200 OK
+X-Served-By: web01
+Content-Type: text/html; charset=utf-8
 
-   ```bash
-   curl http://localhost:8080
-   curl http://localhost:8081
-   ```
+$ curl -I http://localhost:8082
+HTTP/1.1 200 OK
+X-Served-By: web02
+Content-Type: text/html; charset=utf-8
+Architecture
+[Client] → [HAProxy Load Balancer:8082] → [web-01:80] or [web-02:80]
+                     (lb-01)                Flask App    Flask App
+                  172.20.0.10            172.20.0.11   172.20.0.12
 
-2. **Test internal connectivity (from lb-01):**
-
-   ```bash
-   curl http://web-01:80
-   curl http://web-02:80
-   ```
-
-3. **Test load balancing:**
-
-   ```bash
-   curl -I http://localhost:8082
-   curl -I http://localhost:8082
-   ```
-
-**Expected Results:**
-
-* Each request should return `HTTP 200`.
-* The `X-Served-By` header alternates between `web01` and `web02`.
-
----
-
-## Project Structure
-
-```
+Project Structure
 spotify/
 ├── docker-compose.yml
 ├── web/
@@ -195,12 +151,23 @@ spotify/
 │   └── requirements.txt
 └── lb/
     └── Dockerfile
-```
 
----
 
-## Resources
+# Spotify web API link
+https://developer.spotify.com/documentation/web-api
 
-* [Spotify Web API](https://developer.spotify.com/documentation/web-api)
+## Getting Spotify API Credentials
 
----
+To use this application, you must have a Spotify Developer account and register an app to obtain your `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Log in with your Spotify account.
+3. Click "Create an App" and fill in the required details.
+4. After creating the app, you will find your Client ID and Client Secret on the app page.
+5. Set your Redirect URI in the app settings to match the value used in your environment variables (e.g., `http://localhost:8080/callback`).
+
+Use these credentials as environment variables when running the containers.
+
+# License
+
+This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.

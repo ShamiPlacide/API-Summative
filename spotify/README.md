@@ -155,3 +155,19 @@ spotify/
 
 # Spotify web API link
 https://developer.spotify.com/documentation/web-api
+
+## Getting Spotify API Credentials
+
+To use this application, you must have a Spotify Developer account and register an app to obtain your `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`.
+
+1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2. Log in with your Spotify account.
+3. Click "Create an App" and fill in the required details.
+4. After creating the app, you will find your Client ID and Client Secret on the app page.
+5. Set your Redirect URI in the app settings to match the value used in your environment variables (e.g., `http://localhost:8080/callback`).
+
+Use these credentials as environment variables when running the containers.
+
+# License
+
+This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.
