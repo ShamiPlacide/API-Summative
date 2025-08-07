@@ -42,8 +42,7 @@ lb working.png
 |-------------------------|--------------------------------|----------------------------------|
 | `SPOTIFY_CLIENT_ID`     | Your Spotify app client ID     | `abc123def456`                   |
 | `SPOTIFY_CLIENT_SECRET` | Your Spotify app client secret | `xyz789uvw000`                   |
-| `SPOTIFY_REDIRECT_URI`  | OAuth callback URL             | `http://localhost:8080/callback` |
-| `PORT`                  | Application port (default)     | `80`                             |
+| `SPOTIFY_REDIRECT_URI`  | OAuth redirect URI             | `http://localhost:8080/callback` |
 
 ---
 
